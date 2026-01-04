@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Sensitive files
+key.key
+logs.enc
+
+# OS
+.DS_Store
