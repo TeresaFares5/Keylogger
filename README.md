@@ -140,24 +140,6 @@ The project intentionally respects these constraints to highlight real-world def
 
 ---
 
-## What I Learned
-
-* How keyloggers operate at a technical level
-* How encryption protects sensitive data at rest
-* Why WSL, Wayland, and modern OS designs block global input capture
-* How OS-level mitigations reduce the effectiveness of common malware techniques
-* How to design security tooling that is ethical and controlled
-
----
-
-## Portfolio Usage
-
-Suggested description:
-
-"This project explores how modern operating systems restrict global keyboard capture and demonstrates an encrypted, controlled input-monitoring tool designed to highlight OS-level defenses against keylogging."
-
----
-
 ## License
 
 Educational use only.
